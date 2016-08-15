@@ -1,0 +1,61 @@
+sudo: required
+dist: trusty
+language: ruby
+
+before_install:
+before_install:
+- gem install asciidoctor -v 1.5.2
+- gem install tilt
+- sudo pip install git+https://github.com/gitenberg-dev/gitberg
+- sudo pip install pillow
+- sudo pip install cssutils
+- sudo pip install docutils
+- sudo pip install roman
+- sudo pip install git+https://github.com/gitenberg-dev/pg-epubmaker
+script:
+- VERSION=`ruby -e "require 'yaml'; meta = YAML.load_file('metadata.yaml'); puts meta['_version'];"`
+- git clone https://github.com/gitenberg-dev/asciidoctor-htmlbook.git
+- sudo pip install -r asciidoctor-htmlbook/gitberg-machine/requirements.txt
+
+- /usr/bin/python -c "from gitenberg import travis; travis.build_epub()"
+- ebook-convert book.epub book.mobi
+- xvfb-run ebook-convert book.epub book.pdf
+branches:
+  only:
+  - master
+notifications:
+  webhooks:
+    urls:
+      - https://unglue.it/api/travisci/webhook
+    on_success: always
+    on_failure: never
+    on_start: never
+deploy:
+  skip_cleanup: true
+  provider: releases
+  api_key:
+    secure: XuBfV5UE4Uzlm4Gw53VPDBrXZAx5R58IFeIGEvibM/Lp/tcGybwurUGSt/KpQHZLbcqC5CBEPSjtlnWFAi1/SQe63e6euDxT7ENoZOL9UFEhIcgocJ0woPgWou+HTT8L1P8pulnbr68VKeQVStFQnPvMse4DcePy46ngq29pD81c3bjaW02Gkr1+zqMef+kSSvn7KqvFGDyFRgyCoJhaJvXksFtgwpcBokzxSlXE6zEdGy8CeTz9oIVgODEr5o99iUa031ATBCPIM0+J0KcGn+/rNvnIU20hFgVavcHVLGYRym8KOWI7WHPtspHY1+HoDsQEQGzYeS8lCe2X9UPw79oMeMyEJNmFjhpK/1MbOIM2+F6j6nScBCcF4+AeXUZPKH0MeYuCTfA1h/U6y7g0/OQJlTX/TltZzyq6jNMf62jGEccOpCddsbnKb45xSISBaLDZLDDQnAXEZCmiGMuNMuw9OTd3XJ/eALLnYHGvhvNpiiaoEEBa1SBbWkHg56cSDa0bSJkO3Pq4K+DTgjyiiN+BoHgwyZSJNfCmjsKXo6j1v0xvI3FH1r2XsaaZkPHJRUkzl+0TqPrS1EzzRRbMeXEh+L2Nq0Qu3OiU2MmmFpZlhHbKsUIzSxDPEZNEI/1F1CvL6C8r1d6tQTWFE5woRGLKbbVUOJKHy1/2TqUAVNg=
+  file:
+    - book.epub
+    - book.mobi
+    - book.pdf
+  "on":
+    repo: GITenberg/The-Crime-of-Sylvestre-Bonnard_2123
+addons:
+  apt:
+    packages:
+    - xsltproc
+    - xvfb
+    - calibre
+    - python-pip
+    - git
+    - python-dev
+    - libjpeg-dev
+    - libpng-dev
+    - libfreetype6
+    - libfreetype6-dev
+    - zlib1g-dev
+    - python-lxml
+    - libxml2-dev
+    - libxslt1-dev
+    - tidy
